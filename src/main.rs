@@ -89,6 +89,7 @@ fn main() {
 
         let status = me.status().unwrap();
         let stat = me.stat().unwrap();
+
         data.push(Record {
             timestamp: std::time::Instant::now(),
             system_time: std::time::SystemTime::now(),
