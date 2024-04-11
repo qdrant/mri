@@ -31,6 +31,24 @@ Full list can be found here:
 
 MRI can record either absolute values (with `-a` flag) or deltas (with `-r` flag).
 
+### HTML rendering
+
+MRI can also render the collected data as an HTML page.
+
+```bash
+./mri -a status.rssanon -r stat.utime --relative-time --html 'test.html' --pid 123 -d 5
+```
+
+Produces a page like this:
+
+
+![plot](./data/example.png)
+
+
+Generated page is standalone, contains all required data and can be shared with others.
+It is, however, depends on the `apexcharts` library, which is included in the page via CDN.
+
+
 ## Options
 
 ```
@@ -47,6 +65,7 @@ Options:
   -r, --relative <RELATIVE>  list of relative values to display. Example: "stat.stime" The value will be displayed as the difference between the current value and the previous value. The first value will be displayed as 0
       --csv <CSV>            Output path for the CSV file. If "-" is provided, the CSV will be printed to stdout
       --jsonl <JSONL>        Output path for the JSONL file. If "-" is provided, the JSONL will be printed to stdout
+      --html <HTML>          Output path for the HTML file
   -h, --help                 Print help
   -V, --version              Print version
 ```

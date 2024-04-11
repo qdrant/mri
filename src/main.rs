@@ -1,6 +1,7 @@
 mod args;
 mod save_jsonl;
 mod save_csv;
+mod save_html;
 
 use std::collections::HashMap;
 use std::time::Duration;
@@ -106,6 +107,7 @@ fn main() {
     let mut collected_data = vec![];
 
     let mut previous: HashMap<String, f64> = HashMap::new();
+    let mut previous_absolute: HashMap<String, f64> = HashMap::new();
 
     for rec in data {
         if args.relative_time {
@@ -114,7 +116,6 @@ fn main() {
         } else {
             previous.insert("timestamp".to_string(), rec.system_time.duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as f64);
         }
-
 
         let json_value: Value = serde_json::to_value(rec).unwrap();
         for key in args.absolute.iter() {
@@ -128,8 +129,10 @@ fn main() {
         for key in args.relative.iter() {
             let value = get_float_from_value(&json_value, key);
             if let Some(value) = value {
-                let previous_value = previous.entry(key.clone()).or_insert(value);
-                *previous_value = value - *previous_value;
+                let previous_abs_value = previous_absolute.entry(key.clone()).or_insert(value);
+                let previous_value = previous.entry(key.clone()).or_insert(0.0);
+                *previous_value = value - *previous_abs_value;
+                *previous_abs_value = value;
             }
         }
         collected_data.push(previous.clone());
@@ -141,5 +144,9 @@ fn main() {
 
     if let Some(path) = args.csv {
         save_csv::save_csv(&path, &collected_data).unwrap();
+    }
+
+    if let Some(path) = args.html {
+        save_html::save_data_as_html(&path, &collected_data).unwrap();
     }
 }

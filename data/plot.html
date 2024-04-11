@@ -1,0 +1,125 @@
+<html>
+<head>
+    <title>Plot</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts" type="module"></script>
+
+</head>
+<body>
+<div id="charts">
+
+</div>
+
+<script type="module">
+    (function () {
+
+        let data = %DATA%;
+
+        let xdata = [];
+        let xdataTitle = "";
+        let xdataCategory = "";
+
+        // Check eiter delay or timestamp
+        if (data.hasOwnProperty("delay")) {
+            xdata = data["delay"];
+            xdataTitle = "delay";
+            xdataCategory = "numeric";
+            delete data["delay"];
+        } else if (data.hasOwnProperty("timestamp")) {
+            xdata = data["timestamp"];
+            xdataTitle = "timestamp";
+            xdataCategory = "datetime";
+            delete data["timestamp"];
+        }
+
+        let series = [];
+
+        for (let key in data) {
+            let pairs = [];
+            for (let i = 0; i < xdata.length; i++) {
+                pairs.push([xdata[i], data[key][i]]);
+            }
+            series.push({
+                name: key,
+                data: pairs
+            });
+        }
+
+        window.Apex = {
+            chart: {
+                height: 300,
+            },
+            dataLabels: {
+                enabled: false
+            }
+        }
+
+
+        let colors = [
+            "#817",
+            "#36b",
+            "#9d5",
+            "#c66",
+            "#a35",
+            "#e94",
+            "#ed0",
+            "#4d8",
+            "#2cb",
+            "#0bc",
+            "#09c",
+            "#639",
+        ]
+
+        function drawChart(id, series) {
+            // Insert a new div for the chart
+            let div = document.createElement("div");
+            div.id = "chart-" + id;
+            document.getElementById("charts").appendChild(div);
+
+            let options = {
+                series: [series],
+                chart: {
+                    type: 'line',
+                    id: 'chart-' + id,
+                    group: "mri",
+                    zoom: {
+                        enabled: true
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    width: 2,
+                    curve: 'smooth',
+                    colors: colors[id % colors.length]
+                },
+                title: {
+                    text: 'MRI - ' + series.name,
+                    align: 'left'
+                },
+                grid: {
+                    row: {
+                        colors: ['#f3f3f3', 'transparent'],
+                        opacity: 0.5
+                    },
+                },
+                xaxis: {
+                    type: xdataCategory,
+                    title: {
+                        text: xdataTitle
+                    }
+                },
+            };
+            var chart = new ApexCharts(document.querySelector("#chart-" + id), options);
+            chart.render();
+        }
+
+        for (let i = 0; i < series.length; i++) {
+            drawChart(i, series[i]);
+        }
+    })();
+</script>
+
+
+</body>
+</html>

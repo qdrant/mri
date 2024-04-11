@@ -42,4 +42,8 @@ pub struct Args {
     /// Output path for the JSONL file. If "-" is provided, the JSONL will be printed to stdout.
     #[clap(long)]
     pub jsonl: Option<String>,
+
+    /// Output path for the HTML file.
+    #[clap(long)]
+    pub html: Option<String>,
 }
