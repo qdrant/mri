@@ -84,26 +84,6 @@ jobs:
           target: ${{ matrix.target }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  build-windows-binaries:
-    strategy:
-      matrix:
-        include:
-          - os: windows-latest
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: Install minimal stable
-        uses: dtolnay/rust-toolchain@stable
-      - uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
-      - name: Build
-        run: cargo build --release --locked
-
-      - name: Build and publish
-        uses: taiki-e/upload-rust-binary-action@v1
-        with:
-          bin: mri
-          token: ${{ secrets.GITHUB_TOKEN }}
-
   build-app-image:
     strategy:
       matrix:
