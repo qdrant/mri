@@ -13,7 +13,7 @@ pub fn save_data_as_jsonl(path: &str, data: &[HashMap<String, f64>]) -> std::io:
         return Ok(());
     }
 
-    let mut file = File::options().append(true).open(path)?;
+    let mut file = File::options().append(true).create(true).open(path)?;
 
     for record in data {
         let json = serde_json::to_string(&record)?;
