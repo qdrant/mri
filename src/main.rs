@@ -32,6 +32,7 @@ struct Record {
     pub system_time: std::time::SystemTime,
     pub status: procfs::process::Status,
     pub stat: procfs::process::Stat,
+    pub io: procfs::process::Io,
 }
 
 fn get_float_from_value(value: &Value, key: &str) -> Option<f64> {
@@ -90,12 +91,14 @@ fn main() {
 
         let status = me.status().unwrap();
         let stat = me.stat().unwrap();
+        let io = me.io().unwrap();
 
         data.push(Record {
             timestamp: std::time::Instant::now(),
             system_time: std::time::SystemTime::now(),
             status,
             stat,
+            io
         });
         std::thread::sleep(time_delay);
 
