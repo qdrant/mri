@@ -73,12 +73,12 @@ Options:
 
 ## Post-processing of the data
 
-`mri` allows you to merge results of multiple runs into a single with charts.
+`mri` allows you to merge results of multiple runs into a single html with charts.
 
 It is done using the `merge` subcommand. Example:
 
 ```bash
-./mri --jsonl a.jsonl --jsonl b.jsonl --html test.html
+./mri merge --jsonl a.jsonl --jsonl b.jsonl --html test.html
 ```
 
 ![merge result](./data/merge-example.png)
