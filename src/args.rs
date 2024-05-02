@@ -1,10 +1,45 @@
-use clap::Parser;
+use clap::{Args, Parser, Subcommand};
 
 
+
+/// Post process the output of previous runs
+/// by merging multiple jsonl files into a HTML graph
+#[derive(Debug, Args, Clone)]
+pub struct MergeOutput {
+    /// The path to the output HTML file
+    #[clap(long)]
+    pub html: String,
+
+    /// The path jsonl files to merge
+    #[clap(long)]
+    pub jsonl: Vec<String>,
+
+    /// Remove recordings older than the given value
+    #[clap(long)]
+    pub cut_to: Option<f64>,
+
+    /// Remove recordings newer than the given value
+    #[clap(long)]
+    pub cut_from: Option<f64>,
+
+    /// Time offset applied for individual files
+    /// Can specify multiple values, one for each merged file
+    #[clap(long)]
+    pub offset: Vec<f64>,
+}
+
+#[derive(Debug, Subcommand, Clone)]
+pub enum Tools {
+    Merge(MergeOutput),
+}
 
 #[derive(Parser, Debug, Clone)]
 #[clap(version, about)]
-pub struct Args {
+pub struct CommandLine {
+
+    #[clap(subcommand)]
+    pub tool: Option<Tools>,
+
     /// The PID of the process to monitor.
     #[clap(short, long)]
     pub pid: Option<i32>,

@@ -14,34 +14,58 @@
 
         let data = %DATA%;
 
-        let xdata = [];
-        let xdataTitle = "";
-        let xdataCategory = "";
-
-        // Check eiter delay or timestamp
-        if (data.hasOwnProperty("delay")) {
-            xdata = data["delay"];
-            xdataTitle = "delay";
-            xdataCategory = "numeric";
-            delete data["delay"];
-        } else if (data.hasOwnProperty("timestamp")) {
-            xdata = data["timestamp"];
-            xdataTitle = "timestamp";
-            xdataCategory = "datetime";
-            delete data["timestamp"];
+        if (!Array.isArray(data)) {
+            data = [data];
         }
 
-        let series = [];
+        let series = {};
 
-        for (let key in data) {
-            let pairs = [];
-            for (let i = 0; i < xdata.length; i++) {
-                pairs.push([xdata[i], data[key][i]]);
+        for (let idx in data) {
+
+            let xdata = [];
+            let xdataTitle = "";
+            let xdataCategory = "";
+
+            // Check eiter delay or timestamp
+            if (data[idx].hasOwnProperty("delay")) {
+                xdata = data[idx]["delay"];
+                xdataTitle = "delay";
+                xdataCategory = "numeric";
+                delete data[idx]["delay"];
+            } else if (data[idx].hasOwnProperty("timestamp")) {
+                xdata = data[idx]["timestamp"];
+                xdataTitle = "timestamp";
+                xdataCategory = "datetime";
+                delete data[idx]["timestamp"];
             }
-            series.push({
-                name: key,
-                data: pairs
-            });
+
+            let name = data[idx].name || idx + "";
+
+            delete data[idx].name;
+
+
+            for (let key in data[idx]) {
+                if (!series.hasOwnProperty(key)) {
+                    series[key] = {
+                        name: key,
+                        series: [],
+                        xdataCategory: xdataCategory,
+                        xdataTitle: xdataTitle,
+                    };
+                }
+
+                let subseries = series[key].series;
+
+                let pairs = [];
+                for (let i = 0; i < xdata.length; i++) {
+                    pairs.push([xdata[i], data[idx][key][i]]);
+                }
+
+                subseries.push({
+                    name: name,
+                    data: pairs
+                });
+            }
         }
 
         window.Apex = {
@@ -69,14 +93,20 @@
             "#639",
         ]
 
-        function drawChart(id, series) {
+        function drawChart(id, series, name, xdataCategory, xdataTitle) {
             // Insert a new div for the chart
             let div = document.createElement("div");
             div.id = "chart-" + id;
             document.getElementById("charts").appendChild(div);
 
+            let series_colors = [];
+
+            for (let i = 0; i < series.length; i++) {
+                series_colors.push(colors[(id + i) % colors.length]);
+            }
+
             let options = {
-                series: [series],
+                series: series,
                 chart: {
                     type: 'area',
                     id: 'chart-' + id,
@@ -91,13 +121,13 @@
                 dataLabels: {
                     enabled: false
                 },
+                colors: series_colors,
                 stroke: {
                     width: 2,
                     curve: 'smooth',
-                    colors: colors[id % colors.length]
                 },
                 title: {
-                    text: 'MRI - ' + series.name,
+                    text: 'MRI - ' + name,
                     align: 'left'
                 },
                 grid: {
@@ -112,13 +142,24 @@
                         text: xdataTitle
                     }
                 },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'right'
+                }
             };
             var chart = new ApexCharts(document.querySelector("#chart-" + id), options);
             chart.render();
         }
 
-        for (let i = 0; i < series.length; i++) {
-            drawChart(i, series[i]);
+        let sortedKeys = Object.keys(series).sort();
+
+        let id = 0;
+        // Iterate over object keys
+        for (let idx in sortedKeys) {
+            let key = sortedKeys[idx];
+            let theSeries = series[key];
+            drawChart(id, theSeries.series, theSeries.name, theSeries.xdataCategory, theSeries.xdataTitle);
+            id++;
         }
     })();
 </script>

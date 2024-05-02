@@ -69,3 +69,32 @@ Options:
   -h, --help                 Print help
   -V, --version              Print version
 ```
+
+
+## Post-processing of the data
+
+`mri` allows you to merge results of multiple runs into a single with charts.
+
+It is done using the `merge` subcommand. Example:
+
+```bash
+./mri --jsonl a.jsonl --jsonl b.jsonl --html test.html
+```
+
+![merge result](./data/merge-example.png)
+
+### Command line options
+
+```bash
+Post process the output of previous runs by merging multiple jsonl files into a HTML graph
+
+Usage: mri merge [OPTIONS] --html <HTML>
+
+Options:
+      --html <HTML>          The path to the output HTML file
+      --jsonl <JSONL>        The path jsonl files to merge
+      --cut-to <CUT_TO>      Remove recordings older than the given value
+      --cut-from <CUT_FROM>  Remove recordings newer than the given value
+      --offset <OFFSET>      Time offset applied for individual files Can specify multiple values, one for each merged file
+  -h, --help                 Print help
+```

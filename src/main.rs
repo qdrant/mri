@@ -2,17 +2,20 @@ mod args;
 mod save_jsonl;
 mod save_csv;
 mod save_html;
+mod merge;
+mod common;
 
 use std::collections::HashMap;
 use std::time::Duration;
 use clap::Parser;
 use procfs::process::Process;
-use crate::args::Args;
+use crate::args::{CommandLine, Tools};
 
 use std::process::{Child, Command};
 use serde::Serialize;
 use serde_json::Value;
 use shlex::split;
+use crate::merge::merge_results;
 
 struct Nanny {
     pub child: Child,
@@ -37,7 +40,7 @@ struct Record {
 
 fn get_float_from_value(value: &Value, key: &str) -> Option<f64> {
     // Iterate key separated by dot
-    if key == "" {
+    if key.is_empty() {
         return value.as_f64();
     }
 
@@ -53,7 +56,16 @@ fn get_float_from_value(value: &Value, key: &str) -> Option<f64> {
 }
 
 fn main() {
-    let args = Args::parse();
+    let args = CommandLine::parse();
+
+    match args.tool {
+        None => {}
+        Some(Tools::Merge(merge_command)) => {
+            merge_results(merge_command);
+            return;
+        },
+    }
+
     let mut _process_guard = None;
 
     let me = if let Some(pid) = args.pid {
@@ -63,7 +75,7 @@ fn main() {
             panic!("Invalid command line")
         };
 
-        assert!(command_args.len() > 0, "Command must be provided");
+        assert!(command_args.is_empty(), "Command must be provided");
 
         let command_name = command_args.remove(0);
         let mut command = Command::new(command_name);
