@@ -78,10 +78,13 @@
             let options = {
                 series: [series],
                 chart: {
-                    type: 'line',
+                    type: 'area',
                     id: 'chart-' + id,
                     group: "mri",
                     zoom: {
+                        enabled: true
+                    },
+                    selection: {
                         enabled: true
                     }
                 },
