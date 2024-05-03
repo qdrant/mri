@@ -1,9 +1,8 @@
-use std::collections::HashMap;
-use std::io::BufRead;
 use crate::args::MergeOutput;
 use crate::common::{DELAY, TIMESTAMP};
 use crate::save_html::{convert_data_to_html, render_html};
-
+use std::collections::HashMap;
+use std::io::BufRead;
 
 fn read_jsonl_file(path: &str) -> Vec<HashMap<String, f64>> {
     let file_res = std::fs::File::open(path);
@@ -39,7 +38,6 @@ fn get_time_key(data: &HashMap<String, f64>) -> &'static str {
     }
 }
 
-
 /// Read value of either `delay` or `timestamp` key from record
 fn get_time_related_value(record: &HashMap<String, f64>) -> f64 {
     let key = get_time_key(record);
@@ -54,31 +52,36 @@ fn set_time_offset(data: &mut Vec<HashMap<String, f64>>, offset: f64) {
     }
 }
 
-fn preprocess_data(mut data: Vec<HashMap<String, f64>>, cut_to: Option<f64>, cut_from: Option<f64>, offset: Option<f64>) -> Vec<HashMap<String, f64>> {
+fn preprocess_data(
+    mut data: Vec<HashMap<String, f64>>,
+    cut_to: Option<f64>,
+    cut_from: Option<f64>,
+    offset: Option<f64>,
+) -> Vec<HashMap<String, f64>> {
     if let Some(offset) = offset {
         set_time_offset(&mut data, offset);
     }
 
+    data.into_iter()
+        .filter(|record| {
+            let time = get_time_related_value(record);
 
-    data.into_iter().filter(|record| {
-        let time = get_time_related_value(record);
-
-        if let Some(cut_to) = cut_to {
-            if time > cut_to {
-                return false;
+            if let Some(cut_to) = cut_to {
+                if time > cut_to {
+                    return false;
+                }
             }
-        }
 
-        if let Some(cut_from) = cut_from {
-            if time < cut_from {
-                return false;
+            if let Some(cut_from) = cut_from {
+                if time < cut_from {
+                    return false;
+                }
             }
-        }
 
-        true
-    }).collect()
+            true
+        })
+        .collect()
 }
-
 
 pub fn merge_results(args: MergeOutput) {
     let mut output_data = vec![];
@@ -86,15 +89,23 @@ pub fn merge_results(args: MergeOutput) {
     for (idx, file) in args.jsonl.iter().enumerate() {
         let data = read_jsonl_file(file);
         let offset = args.offset.get(idx).cloned();
-        let processed_data = convert_data_to_html(&preprocess_data(data, args.cut_to, args.cut_from, offset));
+        let processed_data =
+            convert_data_to_html(&preprocess_data(data, args.cut_to, args.cut_from, offset));
         output_data.push(processed_data);
     }
 
-    let json_values: Vec<_> = output_data.into_iter().zip(args.jsonl.iter()).map(|(data, file)| {
-        let mut value = serde_json::to_value(data).unwrap();
-        value.as_object_mut().unwrap().insert("name".to_string(), serde_json::Value::String(file.clone()));
-        value
-    }).collect();
+    let json_values: Vec<_> = output_data
+        .into_iter()
+        .zip(args.jsonl.iter())
+        .map(|(data, file)| {
+            let mut value = serde_json::to_value(data).unwrap();
+            value
+                .as_object_mut()
+                .unwrap()
+                .insert("name".to_string(), serde_json::Value::String(file.clone()));
+            value
+        })
+        .collect();
 
     render_html(&args.html, &json_values).unwrap();
 }

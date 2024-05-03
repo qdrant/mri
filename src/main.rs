@@ -1,21 +1,21 @@
 mod args;
-mod save_jsonl;
+mod common;
+mod merge;
 mod save_csv;
 mod save_html;
-mod merge;
-mod common;
+mod save_jsonl;
 
-use std::collections::HashMap;
-use std::time::Duration;
+use crate::args::{CommandLine, Tools};
 use clap::Parser;
 use procfs::process::Process;
-use crate::args::{CommandLine, Tools};
+use std::collections::HashMap;
+use std::time::Duration;
 
-use std::process::{Child, Command};
+use crate::merge::merge_results;
 use serde::Serialize;
 use serde_json::Value;
 use shlex::split;
-use crate::merge::merge_results;
+use std::process::{Child, Command};
 
 struct Nanny {
     pub child: Child,
@@ -26,7 +26,6 @@ impl Drop for Nanny {
         self.child.kill().unwrap();
     }
 }
-
 
 #[derive(Serialize)]
 struct Record {
@@ -63,7 +62,7 @@ fn main() {
         Some(Tools::Merge(merge_command)) => {
             merge_results(merge_command);
             return;
-        },
+        }
     }
 
     let mut _process_guard = None;
@@ -75,7 +74,7 @@ fn main() {
             panic!("Invalid command line")
         };
 
-        assert!(command_args.is_empty(), "Command must be provided");
+        assert!(!command_args.is_empty(), "Command must be provided");
 
         let command_name = command_args.remove(0);
         let mut command = Command::new(command_name);
@@ -110,7 +109,7 @@ fn main() {
             system_time: std::time::SystemTime::now(),
             status,
             stat,
-            io
+            io,
         });
         std::thread::sleep(time_delay);
 
@@ -129,7 +128,13 @@ fn main() {
             let delay = rec.timestamp.duration_since(start).as_millis();
             previous.insert("delay".to_string(), delay as f64);
         } else {
-            previous.insert("timestamp".to_string(), rec.system_time.duration_since(std::time::UNIX_EPOCH).unwrap().as_millis() as f64);
+            previous.insert(
+                "timestamp".to_string(),
+                rec.system_time
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_millis() as f64,
+            );
         }
 
         let json_value: Value = serde_json::to_value(rec).unwrap();

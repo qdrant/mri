@@ -1,7 +1,5 @@
 use clap::{Args, Parser, Subcommand};
 
-
-
 /// Post process the output of previous runs
 /// by merging multiple jsonl files into a HTML graph
 #[derive(Debug, Args, Clone)]
@@ -36,7 +34,6 @@ pub enum Tools {
 #[derive(Parser, Debug, Clone)]
 #[clap(version, about)]
 pub struct CommandLine {
-
     #[clap(subcommand)]
     pub tool: Option<Tools>,
 
