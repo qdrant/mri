@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fs::File;
 use std::io::Write;
 
 pub fn save_csv(path: &str, data: &[HashMap<String, f64>]) -> std::io::Result<()> {
@@ -22,7 +23,7 @@ pub fn save_csv(path: &str, data: &[HashMap<String, f64>]) -> std::io::Result<()
         return Ok(());
     }
 
-    let mut file = std::fs::File::create(path)?;
+    let mut file = File::options().write(true).truncate(true).open(path)?;
 
     // Write header
     writeln!(&mut file, "{}", header_columns.join(",")).unwrap();

@@ -28,6 +28,7 @@ MRI allows to monitor any of the available fields in the `/proc/{pid}/stat` and 
 Full list can be found here:
  - https://docs.rs/procfs/latest/procfs/process/struct.Status.html
  - https://docs.rs/procfs/latest/procfs/process/struct.Stat.html
+ - https://docs.rs/procfs/latest/procfs/process/struct.Io.html (if enough permissions are provided)
 
 MRI can record either absolute values (with `-a` flag) or deltas (with `-r` flag).
 
