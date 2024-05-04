@@ -23,7 +23,11 @@ pub fn save_csv(path: &str, data: &[HashMap<String, f64>]) -> std::io::Result<()
         return Ok(());
     }
 
-    let mut file = File::options().write(true).create(true).truncate(true).open(path)?;
+    let mut file = File::options()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open(path)?;
 
     // Write header
     writeln!(&mut file, "{}", header_columns.join(",")).unwrap();

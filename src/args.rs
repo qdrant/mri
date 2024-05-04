@@ -24,6 +24,10 @@ pub struct MergeOutput {
     /// Can specify multiple values, one for each merged file
     #[clap(long)]
     pub offset: Vec<f64>,
+
+    /// If set, convert timestamps to relative time
+    #[clap(long)]
+    pub to_relative: Option<bool>,
 }
 
 #[derive(Debug, Subcommand, Clone)]

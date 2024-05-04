@@ -44,6 +44,22 @@ fn get_time_related_value(record: &HashMap<String, f64>) -> f64 {
     *record.get(key).unwrap()
 }
 
+fn convert_timestamp_to_relative(data: &mut Vec<HashMap<String, f64>>) {
+    let first_record = data.first().unwrap();
+
+    let time_key = get_time_key(first_record);
+    if time_key == DELAY {
+        return;
+    }
+
+    let first_value = *first_record.get(TIMESTAMP).unwrap();
+
+    for record in data {
+        let value = record.remove(TIMESTAMP).unwrap();
+        record.insert(DELAY.to_string(), value - first_value);
+    }
+}
+
 fn set_time_offset(data: &mut Vec<HashMap<String, f64>>, offset: f64) {
     for record in data {
         let key = get_time_key(record);
@@ -57,7 +73,12 @@ fn preprocess_data(
     cut_to: Option<f64>,
     cut_from: Option<f64>,
     offset: Option<f64>,
+    convert_to_relative: bool,
 ) -> Vec<HashMap<String, f64>> {
+    if convert_to_relative {
+        convert_timestamp_to_relative(&mut data);
+    }
+
     if let Some(offset) = offset {
         set_time_offset(&mut data, offset);
     }
@@ -89,8 +110,13 @@ pub fn merge_results(args: MergeOutput) {
     for (idx, file) in args.jsonl.iter().enumerate() {
         let data = read_jsonl_file(file);
         let offset = args.offset.get(idx).cloned();
-        let processed_data =
-            convert_data_to_html(&preprocess_data(data, args.cut_to, args.cut_from, offset));
+        let processed_data = convert_data_to_html(&preprocess_data(
+            data,
+            args.cut_to,
+            args.cut_from,
+            offset,
+            args.to_relative.unwrap_or_default(),
+        ));
         output_data.push(processed_data);
     }
 
