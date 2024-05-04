@@ -75,6 +75,12 @@ fn preprocess_data(
     offset: Option<f64>,
     convert_to_relative: bool,
 ) -> Vec<HashMap<String, f64>> {
+    data.sort_unstable_by(|a, b| {
+        let a_time = get_time_related_value(a);
+        let b_time = get_time_related_value(b);
+        a_time.partial_cmp(&b_time).unwrap()
+    });
+
     if convert_to_relative {
         convert_timestamp_to_relative(&mut data);
     }
