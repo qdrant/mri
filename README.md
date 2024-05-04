@@ -12,7 +12,8 @@ Collects statistics from the `/proc` filesystem and saves it where you want.
 Just download static binary from the [releases](https://github.com/qdrant/mri/releases) page.
 
 ```bash
-VERSION=v0.1.3 wget https://github.com/qdrant/mri/releases/download/{VERSION}/mri-x86_64-unknown-linux-musl.tar.gz -O mri.tgz ; tar -xzvf mri.tgz
+VERSION=v0.1.8 
+wget https://github.com/qdrant/mri/releases/download/${VERSION}/mri-x86_64-unknown-linux-musl.tar.gz -O mri.tgz ; tar -xzvf mri.tgz
 ```
 
 ## Usage
