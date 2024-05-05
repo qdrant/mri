@@ -68,18 +68,48 @@ fn set_time_offset(data: &mut Vec<HashMap<String, f64>>, offset: f64) {
     }
 }
 
+
+/// Given the maximum amount of data points to keep, thin out the data
+/// by selecting at most the given amount of data points.
+/// The data points are selected evenly from the input data.
+fn thin_out_data<T>(data: Vec<T>, sample: usize) -> Vec<T> {
+    if data.len() <= sample {
+        return data;
+    }
+
+    // Always less than 1 and greater than 0
+    let target_ratio = sample as f64 / data.len() as f64;
+    let mut result = vec![];
+
+    for (idx, record) in data.into_iter().enumerate() {
+        if result.len() == sample {
+            break;
+        }
+        let running_ratio = result.len() as f64 / (idx + 1) as f64;
+        if running_ratio < target_ratio {
+            result.push(record);
+        }
+    }
+    result
+}
+
 fn preprocess_data(
     mut data: Vec<HashMap<String, f64>>,
     cut_to: Option<f64>,
     cut_from: Option<f64>,
     offset: Option<f64>,
     convert_to_relative: bool,
+    sample: Option<usize>,
 ) -> Vec<HashMap<String, f64>> {
     data.sort_unstable_by(|a, b| {
         let a_time = get_time_related_value(a);
         let b_time = get_time_related_value(b);
         a_time.partial_cmp(&b_time).unwrap()
     });
+
+    if let Some(sample) = sample {
+        data = thin_out_data(data, sample);
+    }
 
     if convert_to_relative {
         convert_timestamp_to_relative(&mut data);
@@ -122,6 +152,7 @@ pub fn merge_results(args: MergeOutput) {
             args.cut_from,
             offset,
             args.to_relative.unwrap_or_default(),
+            args.sample,
         ));
         output_data.push(processed_data);
     }

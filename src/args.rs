@@ -28,6 +28,13 @@ pub struct MergeOutput {
     /// If set, convert timestamps to relative time
     #[clap(long)]
     pub to_relative: Option<bool>,
+
+    /// Sample max amount of data points
+    /// If not set, all data points will be used
+    /// If set, evenly selects at most the given amount of data points per file
+    /// TIP: Use this to reduce the amount of data points for large files
+    #[clap(long)]
+    pub sample: Option<usize>,
 }
 
 #[derive(Debug, Subcommand, Clone)]

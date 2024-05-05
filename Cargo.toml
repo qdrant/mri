@@ -1,7 +1,7 @@
 [package]
 name = "mri"
 authors = ["Qdrant Team <team@qdrant.com>"]
-version = "0.1.9"
+version = "0.1.10"
 edition = "2021"
 license = "Apache-2.0"
 
